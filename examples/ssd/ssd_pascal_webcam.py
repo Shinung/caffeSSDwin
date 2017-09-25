@@ -172,7 +172,7 @@ test_net_file = "{}/test.prototxt".format(save_dir)
 # snapshot prefix.
 snapshot_prefix = "{}/{}".format(snapshot_dir, model_name)
 # job script path.
-job_file = "{}/{}.sh".format(job_dir, model_name)
+job_file = "{}/{}.ps1".format(job_dir, model_name)
 
 # Find most recent snapshot.
 max_iter = 0
@@ -277,10 +277,12 @@ shutil.copy(test_net_file, job_dir)
 # Create job file.
 with open(job_file, 'w') as f:
   f.write('cd {}\n'.format(caffe_root))
-  f.write('./build/tools/caffe test \\\n')
-  f.write('--model="{}" \\\n'.format(test_net_file))
-  f.write('--weights="{}" \\\n'.format(pretrain_model))
-  f.write('--iterations="{}" \\\n'.format(test_iter))
+  f.write('.\\build\\tools\\Release\\caffe.exe test ')
+  test_net_file = os.path.abspath(test_net_file)
+  f.write('--model="{}" '.format(test_net_file))
+  pretrain_model = os.path.abspath(pretrain_model)
+  f.write('--weights="{}" '.format(pretrain_model))
+  f.write('--iterations="{}" '.format(test_iter))
   if solver_mode == P.Solver.GPU:
     f.write('--gpu {}\n'.format(gpus))
 
@@ -291,4 +293,9 @@ shutil.copy(py_file, job_dir)
 # Run the job.
 os.chmod(job_file, stat.S_IRWXU)
 if run_soon:
-  subprocess.call(job_file, shell=True)
+  job_file = os.path.abspath(job_file)
+  # subprocess.call(job_file, shell=True)
+  p = subprocess.Popen(["powershell.exe",
+                        job_file],
+                       stdout=sys.stdout)
+  p.communicate()

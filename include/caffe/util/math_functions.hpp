@@ -73,7 +73,9 @@ template <typename Dtype>
 Dtype caffe_nextafter(const Dtype b);
 
 template <typename Dtype>
-void caffe_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r);
+void caffe_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r,
+	int num = 0, int channels = 0, int fanin = 0, int fanout = 0, int in_n = 0,
+	int width = 0, int height = 0);
 
 template <typename Dtype>
 void caffe_rng_gaussian(const int n, const Dtype mu, const Dtype sigma,

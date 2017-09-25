@@ -26,10 +26,17 @@ class GradientBasedSolverTest : public MultiDeviceTest<TypeParam> {
  protected:
   GradientBasedSolverTest() :
       seed_(1701), num_(4), channels_(3), height_(10), width_(10),
+#if defined(_MSC_VER)
+	  share_(false) {
+	  input_file_ = new string(
+		  ABS_TEST_DATA_DIR "/solver_data_list.txt");
+  }
+#elif
       share_(false) {
         input_file_ = new string(
         CMAKE_SOURCE_DIR "caffe/test/test_data/solver_data_list.txt" CMAKE_EXT);
       }
+#endif
   ~GradientBasedSolverTest() {
     delete input_file_;
   }
@@ -177,6 +184,9 @@ class GradientBasedSolverTest : public MultiDeviceTest<TypeParam> {
       proto << "momentum: " << momentum << " ";
     }
     MakeTempDir(&snapshot_prefix_);
+#if defined(_MSC_VER)
+	std::replace(snapshot_prefix_.begin(), snapshot_prefix_.end(), '\\', '/');
+#endif
     proto << "snapshot_prefix: '" << snapshot_prefix_ << "/' ";
     if (snapshot) {
       proto << "snapshot: " << num_iters << " ";

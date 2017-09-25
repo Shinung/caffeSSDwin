@@ -15,6 +15,8 @@ namespace bp = boost::python;
 #include "caffe/caffe.hpp"
 #include "caffe/util/signal_handler.h"
 
+//#define PRINT_LINE
+
 using caffe::Blob;
 using caffe::Caffe;
 using caffe::Net;
@@ -222,36 +224,75 @@ int train() {
       LOG(INFO) << "GPU " << gpus[i] << ": " << device_prop.name;
     }
 #endif
-    solver_param.set_device_id(gpus[0]);
+#ifdef PRINT_LINE
+	LOG(INFO) << "solver_param.set_device_id(gpus[0])";
+#endif // PRINT_LINE
+	solver_param.set_device_id(gpus[0]);
+#ifdef PRINT_LINE
+	LOG(INFO) << "Caffe::SetDevice(gpus[0]);";
+#endif // PRINT_LINE
     Caffe::SetDevice(gpus[0]);
+#ifdef PRINT_LINE
+	LOG(INFO) << "Caffe::set_mode(Caffe::GPU);";
+#endif // PRINT_LINE
     Caffe::set_mode(Caffe::GPU);
+#ifdef PRINT_LINE
+	LOG(INFO) << "Caffe::set_solver_count(gpus.size());";
+#endif // PRINT_LINE
     Caffe::set_solver_count(gpus.size());
   }
 
+#ifdef PRINT_LINE
+  LOG(INFO) << "caffe::SignalHandler signal_handler(";
+#endif // PRINT_LINE
   caffe::SignalHandler signal_handler(
         GetRequestedAction(FLAGS_sigint_effect),
         GetRequestedAction(FLAGS_sighup_effect));
 
+#ifdef PRINT_LINE
+  LOG(INFO) << "shared_ptr<caffe::Solver<float> >";
+#endif // PRINT_LINE
   shared_ptr<caffe::Solver<float> >
       solver(caffe::SolverRegistry<float>::CreateSolver(solver_param));
 
+#ifdef PRINT_LINE
+  LOG(INFO) << "solver->SetActionFunction";
+#endif // PRINT_LINE
   solver->SetActionFunction(signal_handler.GetActionFunction());
 
   if (FLAGS_snapshot.size()) {
     LOG(INFO) << "Resuming from " << FLAGS_snapshot;
+#ifdef PRINT_LINE
+	LOG(INFO) << "solver->Restore(FLAGS_snapshot.c_str())";
+#endif // PRINT_LINE
     solver->Restore(FLAGS_snapshot.c_str());
   } else if (FLAGS_weights.size()) {
+#ifdef PRINT_LINE
+	  LOG(INFO) << "CopyLayers(solver.get(), FLAGS_weights);";
+#endif // PRINT_LINE
     CopyLayers(solver.get(), FLAGS_weights);
   }
 
   if (gpus.size() > 1) {
+#ifdef PRINT_LINE
+	  LOG(INFO) << "caffe::P2PSync<float> sync(solver, NULL, solver->param());";
+#endif // PRINT_LINE
     caffe::P2PSync<float> sync(solver, NULL, solver->param());
+#ifdef PRINT_LINE
+	LOG(INFO) << "sync.Run(gpus);";
+#endif // PRINT_LINE
     sync.Run(gpus);
   } else {
     LOG(INFO) << "Starting Optimization";
+#ifdef PRINT_LINE
+	LOG(INFO) << "solver->Solve();";
+#endif // PRINT_LINE
     solver->Solve();
   }
   LOG(INFO) << "Optimization Done.";
+#ifdef PRINT_LINE
+  LOG(INFO) << "return 0;";
+#endif // PRINT_LINE
   return 0;
 }
 RegisterBrewFunction(train);

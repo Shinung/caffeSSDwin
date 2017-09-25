@@ -3,7 +3,20 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/regex.hpp>
+
+/*
+* flag : WillChoi
+* modify date : 17.09.21
+* modified : Changed from <boost/regex.hpp> to <regex>
+* resone : nvcc make compile error with boost::regex but std::regex don't make error with the compiler
+*		   and also std::regex was included as the standard since C++11.
+*		   Hence, in this case, regex library in boost isn't necessary any more from now
+*		   although std::regex is not fully implemantation in C++11.
+* reference : https://github.com/colmap/colmap/issues/29
+*			  https://stackoverflow.com/questions/7589672/boost-regex-vs-c11-regex
+*/
+//#include <boost/regex.hpp>
+#include <regex>
 
 #include <map>
 #include <string>

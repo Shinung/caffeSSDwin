@@ -117,6 +117,7 @@ function(caffe_print_configuration_summary)
   caffe_status("  USE_OPENCV        :   ${USE_OPENCV}")
   caffe_status("  USE_LEVELDB       :   ${USE_LEVELDB}")
   caffe_status("  USE_LMDB          :   ${USE_LMDB}")
+  caffe_status("  USE_NCCL          :   ${USE_NCCL}")
   caffe_status("  ALLOW_LMDB_NOLOCK :   ${ALLOW_LMDB_NOLOCK}")
   caffe_status("")
   caffe_status("Dependencies:")
@@ -134,6 +135,10 @@ function(caffe_print_configuration_summary)
   endif()
   if(USE_OPENCV)
     caffe_status("  OpenCV            :   Yes (ver. ${OpenCV_VERSION})")
+	# flag : WillChoi
+	# modified date : 17.09.15
+	# It's for checking of the major version number of current OpenCV
+	caffe_status("  OpenCV Major ver  :   ${OpenCV_VERSION_MAJOR}")
   endif()
   caffe_status("  CUDA              : " HAVE_CUDA THEN "Yes (ver. ${CUDA_VERSION})" ELSE "No" )
   caffe_status("")

@@ -80,8 +80,10 @@ remove_old_models = False
 
 # The database file for training data. Created by data/VOC0712/create_data.sh
 train_data = "examples/VOC0712/VOC0712_trainval_lmdb"
+train_data = os.path.abspath(train_data)
 # The database file for testing data. Created by data/VOC0712/create_data.sh
 test_data = "examples/VOC0712/VOC0712_test_lmdb"
+test_data = os.path.abspath(test_data)
 # Specify the batch sampler.
 resize_width = 300
 resize_height = 300
@@ -243,7 +245,11 @@ snapshot_dir = "models/VGGNet/VOC0712/{}".format(job_name)
 # Directory which stores the job script and log file.
 job_dir = "jobs/VGGNet/VOC0712/{}".format(job_name)
 # Directory which stores the detection results.
-output_result_dir = "{}/data/VOCdevkit/results/VOC2007/{}/Main".format(os.environ['HOME'], job_name)
+# flag : WillChoi
+# modified date : 17.09.15
+# modify : Hard coding for path instead of 'os.environ['HOME']'
+output_result_dir = "{}/data/VOCdevkit/results/VOC2007/{}/Main".format("C:/Users/qisenswin", job_name)
+#output_result_dir = "{}/data/VOCdevkit/results/VOC2007/{}/Main".format(os.environ['HOME'], job_name)
 
 # model definition files.
 train_net_file = "{}/train.prototxt".format(save_dir)
@@ -253,7 +259,11 @@ solver_file = "{}/solver.prototxt".format(save_dir)
 # snapshot prefix.
 snapshot_prefix = "{}/{}".format(snapshot_dir, model_name)
 # job script path.
-job_file = "{}/{}.sh".format(job_dir, model_name)
+# flag : WillChoi
+# modified date : 17.09.15
+# modify : convert from .sh to .bat file for subprocess.call function's argument
+job_file = "{}/{}.ps1".format(job_dir, model_name)
+#job_file = "{}/{}.sh".format(job_dir, model_name)
 
 # Stores the test image names and sizes. Created by data/VOC0712/create_list.sh
 name_size_file = "data/VOC0712/test_name_size.txt"
@@ -329,13 +339,13 @@ clip = False
 
 # Solver parameters.
 # Defining which GPUs to use.
-gpus = "0,1,2,3"
+gpus = "0,1"
 gpulist = gpus.split(",")
 num_gpus = len(gpulist)
 
 # Divide the mini-batch to different GPUs.
-batch_size = 32
-accum_batch_size = 32
+batch_size = 16
+accum_batch_size = 16
 iter_size = accum_batch_size / batch_size
 solver_mode = P.Solver.CPU
 device_id = 0
@@ -533,10 +543,11 @@ for file in os.listdir(snapshot_dir):
     if iter > max_iter:
       max_iter = iter
 
-train_src_param = '--weights="{}" \\\n'.format(pretrain_model)
+pretrain_model = os.path.abspath(pretrain_model)
+train_src_param = '--weights="{}" '.format(pretrain_model)
 if resume_training:
   if max_iter > 0:
-    train_src_param = '--snapshot="{}_iter_{}.solverstate" \\\n'.format(snapshot_prefix, max_iter)
+    train_src_param = '--snapshot="{}_iter_{}.solverstate" '.format(snapshot_prefix, max_iter)
 
 if remove_old_models:
   # Remove any snapshots smaller than max_iter.
@@ -554,14 +565,21 @@ if remove_old_models:
 
 # Create job file.
 with open(job_file, 'w') as f:
+  job_dir = os.path.abspath(job_dir)
   f.write('cd {}\n'.format(caffe_root))
-  f.write('./build/tools/caffe train \\\n')
-  f.write('--solver="{}" \\\n'.format(solver_file))
+  #f.write('Start-Transcript -Path {}\\{}.txt\n'.format(job_dir, model_name))
+  f.write('.\\build\\tools\\Release\\caffe.exe train ')
+  solver_file = os.path.abspath(solver_file)
+  print(solver_file)
+  f.write('--solver="{}" '.format(solver_file))
+  print(train_src_param)
   f.write(train_src_param)
+  print(job_dir)
+  print(model_name)
   if solver_param['solver_mode'] == P.Solver.GPU:
-    f.write('--gpu {} 2>&1 | tee {}/{}.log\n'.format(gpus, job_dir, model_name))
-  else:
-    f.write('2>&1 | tee {}/{}.log\n'.format(job_dir, model_name))
+    f.write('--gpu {}\n'.format(gpus))
+  #else:
+  #  f.write('2>&1 | tee {}\\{}.log\n'.format(job_dir, model_name))
 
 # Copy the python script to job_dir.
 py_file = os.path.abspath(__file__)
@@ -570,4 +588,17 @@ shutil.copy(py_file, job_dir)
 # Run the job.
 os.chmod(job_file, stat.S_IRWXU)
 if run_soon:
-  subprocess.call(job_file, shell=True)
+  # flag : WillChoi
+  # modified date : 17.09.15
+  # modify : Added 'os.path.expanduser' to re-present path style to Windows
+  job_file = os.path.abspath(job_file)
+  print(job_file)
+  #subprocess.call(job_file, shell=True)
+  p = subprocess.Popen(["powershell.exe",
+                       job_file],
+                       stdout=sys.stdout)
+  p. communicate()
+  #p = subprocess.Popen(["powershell.exe",
+  #                      'Stop-Transcript'],
+  #                     stdout=sys.stdout)
+  #p.communicate()

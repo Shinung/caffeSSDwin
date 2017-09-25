@@ -6,6 +6,16 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <fcntl.h>
+/*
+* flag : WillChoi
+* modify date : 17.09.13
+* modified : declaration '#if define(_MSC_VER) ... #endif' to be copied
+* from willyd's caffe windows branch on github for MSVC 14
+* reason : not sure but it is added on source in windows branch
+*/
+#if defined(_MSC_VER)
+#include <io.h>
+#endif
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
@@ -41,7 +51,17 @@ using google::protobuf::io::CodedOutputStream;
 using google::protobuf::Message;
 
 bool ReadProtoFromTextFile(const char* filename, Message* proto) {
-  int fd = open(filename, O_RDONLY);
+	/*
+	* flag : WillChoi
+	* modify date : 17.09.13
+	* modified : declaration '#if define(_MSC_VER) ... #endif' to be copied
+	* from willyd's caffe windows branch on github for MSVC 14
+	*/
+#if defined (_MSC_VER)  // for MSC compiler binary flag needs to be specified
+	int fd = open(filename, O_RDONLY | O_BINARY);
+#else
+	int fd = open(filename, O_RDONLY);
+#endif
   CHECK_NE(fd, -1) << "File not found: " << filename;
   FileInputStream* input = new FileInputStream(fd);
   bool success = google::protobuf::TextFormat::Parse(input, proto);
@@ -59,7 +79,17 @@ void WriteProtoToTextFile(const Message& proto, const char* filename) {
 }
 
 bool ReadProtoFromBinaryFile(const char* filename, Message* proto) {
-  int fd = open(filename, O_RDONLY);
+	/*
+	* flag : WillChoi
+	* modify date : 17.09.13
+	* modified : declaration '#if define(_MSC_VER) ... #endif' to be copied
+	* from willyd's caffe windows branch on github for MSVC 14
+	*/
+#if defined (_MSC_VER)  // for MSC compiler binary flag needs to be specified
+	int fd = open(filename, O_RDONLY | O_BINARY);
+#else
+	int fd = open(filename, O_RDONLY);
+#endif
   CHECK_NE(fd, -1) << "File not found: " << filename;
   ZeroCopyInputStream* raw_input = new FileInputStream(fd);
   CodedInputStream* coded_input = new CodedInputStream(raw_input);

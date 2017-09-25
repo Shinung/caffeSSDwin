@@ -16,6 +16,15 @@
 #include <utility>  // pair
 #include <vector>
 
+/*
+* flag : WillChoi
+* modify date : 17.09.13
+* modified : Annotated below '#inlcude'
+* resone : not suer but the '.hpp' file has symbols info
+*/
+#ifdef CMAKE_WINDOWS_BUILD
+#include "caffe/export.hpp"
+#endif
 #include "caffe/util/device_alternate.hpp"
 
 // Convert macro to string
@@ -97,6 +106,15 @@ using std::vector;
 // Currently it initializes google flags and google logging.
 void GlobalInit(int* pargc, char*** pargv);
 
+/*
+* flag : WillChoi
+* modify date : 17.09.20
+* modified : Declaration cluster_seedgen in header file for using the fuction
+*			 in rng_stream()
+* ref : https://github.com/BVLC/caffe/pull/297
+*/
+uint64_t cluster_seedgen(void);
+
 // A singleton class to hold common caffe stuff, such as the handler that
 // caffe is going to use for cublas, curand, etc.
 class Caffe {
@@ -115,7 +133,7 @@ class Caffe {
   class RNG {
    public:
     RNG();
-    explicit RNG(unsigned int seed);
+    explicit RNG(int64_t seed);
     explicit RNG(const RNG&);
     RNG& operator=(const RNG&);
     void* generator();
@@ -127,7 +145,7 @@ class Caffe {
   // Getters for boost rng, curand, and cublas handles
   inline static RNG& rng_stream() {
     if (!Get().random_generator_) {
-      Get().random_generator_.reset(new RNG());
+		Get().random_generator_.reset(new RNG());
     }
     return *(Get().random_generator_);
   }
@@ -147,7 +165,7 @@ class Caffe {
   // it personally but better to note it here in the header file.
   inline static void set_mode(Brew mode) { Get().mode_ = mode; }
   // Sets the random seed of both boost and curand
-  static void set_random_seed(const unsigned int seed);
+  static void set_random_seed(const uint64_t seed);
   // Sets the device. Since we have cublas and curand stuff, set device also
   // requires us to reset those values.
   static void SetDevice(const int device_id);

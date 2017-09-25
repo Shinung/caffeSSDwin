@@ -56,6 +56,8 @@ void Solver<Dtype>::CheckType(SolverParameter* param) {
   }
 }
 
+//#define PRINT_LINE
+
 template <typename Dtype>
 void Solver<Dtype>::Init(const SolverParameter& param) {
   CHECK(Caffe::root_solver() || root_solver_)
@@ -64,10 +66,20 @@ void Solver<Dtype>::Init(const SolverParameter& param) {
     << std::endl << param.DebugString();
   param_ = param;
   CHECK_GE(param_.average_loss(), 1) << "average_loss should be non-negative.";
+#ifdef PRINT_LINE
+  LOG(INFO) << "Solver<Dtype>::Init";
+#endif // PRINT_LINE
+
   CheckSnapshotWritePermissions();
   if (Caffe::root_solver() && param_.random_seed() >= 0) {
+#ifdef PRINT_LINE
+	  LOG(INFO) << "Solver<Dtype>::Init" << " inside if";
+#endif // PRINT_LINE
     Caffe::set_random_seed(param_.random_seed());
   }
+#ifdef PRINT_LINE
+  LOG(INFO) << "Solver<Dtype>::Init";
+#endif // PRINT_LINE
   // Scaffolding code
   InitTrainNet();
   if (Caffe::root_solver()) {
@@ -76,6 +88,9 @@ void Solver<Dtype>::Init(const SolverParameter& param) {
   }
   iter_ = 0;
   current_step_ = 0;
+#ifdef PRINT_LINE
+  LOG(INFO) << "Solver<Dtype>::Init";
+#endif // PRINT_LINE
 }
 
 template <typename Dtype>

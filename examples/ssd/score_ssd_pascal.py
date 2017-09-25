@@ -241,7 +241,11 @@ snapshot_dir = "models/VGGNet/VOC0712/{}".format(job_name)
 # Directory which stores the job script and log file.
 job_dir = "jobs/VGGNet/VOC0712/{}_score".format(job_name)
 # Directory which stores the detection results.
-output_result_dir = "{}/data/VOCdevkit/results/VOC2007/{}_score/Main".format(os.environ['HOME'], job_name)
+# flag : WillChoi
+# modified date : 17.09.15
+# modify : Hard coding for path instead of 'os.environ['HOME']'
+output_result_dir = "{}/data/VOCdevkit/results/VOC2007/{}_score/Main".format("C:/Users/qisenswin", job_name)
+#output_result_dir = "{}/data/VOCdevkit/results/VOC2007/{}_score/Main".format(os.environ['HOME'], job_name)
 
 # model definition files.
 train_net_file = "{}/train.prototxt".format(save_dir)
@@ -251,7 +255,7 @@ solver_file = "{}/solver.prototxt".format(save_dir)
 # snapshot prefix.
 snapshot_prefix = "{}/{}".format(snapshot_dir, model_name)
 # job script path.
-job_file = "{}/{}.sh".format(job_dir, model_name)
+job_file = "{}/{}.ps1".format(job_dir, model_name)
 
 # Find most recent snapshot.
 max_iter = 0
@@ -538,13 +542,15 @@ shutil.copy(solver_file, job_dir)
 # Create job file.
 with open(job_file, 'w') as f:
   f.write('cd {}\n'.format(caffe_root))
-  f.write('./build/tools/caffe train \\\n')
-  f.write('--solver="{}" \\\n'.format(solver_file))
-  f.write('--weights="{}" \\\n'.format(pretrain_model))
+  f.write('.\\build\\tools\\Release\\caffe.exe train ')
+  solver_file = os.path.abspath(solver_file)
+  f.write('--solver="{}" '.format(solver_file))
+  pretrain_model = os.path.abspath(pretrain_model)
+  f.write('--weights="{}" '.format(pretrain_model))
   if solver_param['solver_mode'] == P.Solver.GPU:
-    f.write('--gpu {} 2>&1 | tee {}/{}_test{}.log\n'.format(gpus, job_dir, model_name, max_iter))
+    f.write('--gpu {} 2>&1 | tee {}\\{}_test{}.log\n'.format(gpus, job_dir, model_name, max_iter))
   else:
-    f.write('2>&1 | tee {}/{}.log\n'.format(job_dir, model_name))
+    f.write('2>&1 | tee {}\\{}.log\n'.format(job_dir, model_name))
 
 # Copy the python script to job_dir.
 py_file = os.path.abspath(__file__)
@@ -553,4 +559,13 @@ shutil.copy(py_file, job_dir)
 # Run the job.
 os.chmod(job_file, stat.S_IRWXU)
 if run_soon:
-  subprocess.call(job_file, shell=True)
+    # flag : WillChoi
+    # modified date : 17.09.15
+    # modify : Added 'os.path.expanduser' to re-present path style to Windows
+    job_file = os.path.abspath(job_file)
+    print(job_file)
+    # subprocess.call(job_file, shell=True)
+    #p = subprocess.Popen(["powershell.exe",
+    #                      job_file],
+    #                     stdout=sys.stdout)
+    #p. communicate()

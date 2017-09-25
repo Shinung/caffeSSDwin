@@ -27,12 +27,19 @@ void hdf5_load_nd_dataset_helper(
   status = H5LTget_dataset_info(
       file_id, dataset_name_, dims.data(), &class_, NULL);
   CHECK_GE(status, 0) << "Failed to get dataset info for " << dataset_name_;
+  /*
+   * flag : WillChoi
+   * modify date : 17.09.13
+   * modified : added syntex '{', '}' under 'case H5T_FLOAT:' and 'case H5T_INTEGER:'
+   * to be copied from willyd's caffe windows branch on github for MSVC 14
+   * reason : occured syntex error when compiling
+   */
   switch (class_) {
   case H5T_FLOAT:
-    LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_FLOAT";
+	{ LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_FLOAT"; }
     break;
   case H5T_INTEGER:
-    LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_INTEGER";
+	{ LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_INTEGER"; }
     break;
   case H5T_TIME:
     LOG(FATAL) << "Unsupported datatype class: H5T_TIME";

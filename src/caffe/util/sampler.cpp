@@ -4,6 +4,8 @@
 #include "caffe/util/bbox_util.hpp"
 #include "caffe/util/sampler.hpp"
 
+//#define PRINT_LINE
+
 namespace caffe {
 
 void GroupObjectBBoxes(const AnnotatedDatum& anno_datum,
@@ -89,6 +91,7 @@ void SampleBBox(const Sampler& sampler, NormalizedBBox* sampled_bbox) {
   CHECK_GT(sampler.min_scale(), 0.);
   CHECK_LE(sampler.max_scale(), 1.);
   float scale;
+
   caffe_rng_uniform(1, sampler.min_scale(), sampler.max_scale(), &scale);
 
   // Get random aspect ratio.
@@ -96,18 +99,75 @@ void SampleBBox(const Sampler& sampler, NormalizedBBox* sampled_bbox) {
   CHECK_GT(sampler.min_aspect_ratio(), 0.);
   CHECK_LT(sampler.max_aspect_ratio(), FLT_MAX);
   float aspect_ratio;
+
   caffe_rng_uniform(1, sampler.min_aspect_ratio(), sampler.max_aspect_ratio(),
       &aspect_ratio);
 
-  aspect_ratio = std::max<float>(aspect_ratio, std::pow(scale, 2.));
-  aspect_ratio = std::min<float>(aspect_ratio, 1 / std::pow(scale, 2.));
+  aspect_ratio = std::max<float>(aspect_ratio, std::pow(scale, 2));
+  aspect_ratio = std::min<float>(aspect_ratio, 1.f / std::pow(scale, 2));
 
   // Figure out bbox dimension.
   float bbox_width = scale * sqrt(aspect_ratio);
   float bbox_height = scale / sqrt(aspect_ratio);
 
+#ifdef _MSC_VER
+  /*
+  * flag : WillChoi
+  * modify date : 17.09.25
+  * modified : If bbox_width has a value over 1.0000001f, then bbox_width will be changed to 1.f
+  * resone : The result of '1 - bbox_width' is normally '0.f' althouh bbox_width has a over value
+  *			 to be obtain by before calculation.
+  *			 However, '1 - bbox_width' is sometimes a negative value. I'm not sure why to happen its but
+  *			 there is no like this issue on our linux machine, which the distro is Ubuntu 16.04 x86_64,
+  *			 and it is occured only on Windows10 x64.
+  */
+  if (bbox_width >= 1.0000001f)
+	  bbox_width = 1.f;
+#endif
+
   // Figure out top left coordinates.
   float w_off, h_off;
+  
+#ifdef PRINT_LINE
+  if (1 - bbox_width < 0 || 1 - bbox_height < 0)
+  {
+	  float check_bw = 1.f - bbox_width;
+	  float check_bh = 1.f - bbox_height;
+	  float temp = 1.f;
+	  char *a = new char[sizeof(float)];
+	  char *b = new char[sizeof(float)];
+	  memcpy(a, &temp, sizeof(float));
+	  memcpy(b, &bbox_width, sizeof(float));
+	  std::cout.setf(ios::fixed);
+
+	  for (int i = 0; i < sizeof(float); ++i)
+		  std::cout << std::hex << static_cast<int>(a[i]) << " ";
+	  std::cout << std::endl;
+	  for (int i = 0; i < sizeof(float); ++i)
+		  std::cout << std::hex << static_cast<int>(b[i]) << " ";
+	  std::cout << std::endl;
+
+	  std::cout.precision(15);
+	  std::cout << "bbox_width: " << bbox_width << std::endl;
+
+	  float tr = bbox_width;
+	  if (tr >= 1.0000001f)
+	  {
+		  std::cout << "tr >= 1.0000001f" << std::endl;
+		  tr = 1.f;
+		  std::cout << "tr = 1.f -> " << tr << std::endl;
+	  }
+
+	  LOG(INFO) << "scale: " << scale << " sqrt(ar): " << sqrt(aspect_ratio);
+	  LOG(INFO) << " ch_bw: " << check_bw;
+	  LOG(INFO) << "bbox_height: " << bbox_height;
+	  LOG(INFO) << " ch_bh: " << check_bh;
+	  std::cout.unsetf(ios::fixed);
+	  delete[] a;
+	  delete[] b;
+  }
+#endif // PRINT_LINE
+
   caffe_rng_uniform(1, 0.f, 1 - bbox_width, &w_off);
   caffe_rng_uniform(1, 0.f, 1 - bbox_height, &h_off);
 

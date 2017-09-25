@@ -1,6 +1,18 @@
 #ifdef USE_LMDB
 #include "caffe/util/db_lmdb.hpp"
 
+/*
+* flag : WillChoi
+* modify date : 17.09.13
+* modified : declaration '#if define(_MSC_VER) ... #endif' to be copied
+* from willyd's caffe windows branch on github for MSVC 14
+* reason : 'mkdir' macro defined differently with GCC and MSVC 14
+*/
+#if defined(_MSC_VER)
+#include <direct.h>
+#define mkdir(X, Y) _mkdir(X)
+#endif
+
 #include <sys/stat.h>
 
 #include <string>

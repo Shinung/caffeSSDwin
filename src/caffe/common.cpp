@@ -1,3 +1,14 @@
+/*
+* flag : WillChoi
+* modify date : 17.09.13
+* modified : declaration '#if define(_MSC_VER) ... #endif' to be copied
+* from willyd's caffe windows branch on github for MSVC 14
+* resone : In Windows OS, 'getpid()' function is in 'process.h' and named '_getpid()'
+*/
+#if defined(_MSC_VER)
+#include <process.h>
+#define getpid() _getpid()
+#endif
 #include <boost/thread.hpp>
 #include <glog/logging.h>
 #include <cmath>
@@ -20,23 +31,25 @@ Caffe& Caffe::Get() {
 }
 
 // random seeding
-int64_t cluster_seedgen(void) {
+uint64_t cluster_seedgen(void) {
   int64_t s, seed, pid;
+#ifndef _MSC_VER
   FILE* f = fopen("/dev/urandom", "rb");
   if (f && fread(&seed, 1, sizeof(seed), f) == sizeof(seed)) {
-    fclose(f);
-    return seed;
+	  fclose(f);
+	  return seed;
   }
 
   LOG(INFO) << "System entropy source not available, "
-              "using fallback algorithm to generate seed instead.";
+	  "using fallback algorithm to generate seed instead.";
   if (f)
-    fclose(f);
+	  fclose(f);
+#endif // !_MSC_VER  
 
   pid = getpid();
   s = time(NULL);
   seed = std::abs(((s * 181) * ((pid - 83) * 359)) % 104729);
-  return seed;
+  return static_cast<uint64_t>(seed);
 }
 
 
@@ -46,7 +59,16 @@ void GlobalInit(int* pargc, char*** pargv) {
   // Google logging.
   ::google::InitGoogleLogging(*(pargv)[0]);
   // Provide a backtrace on segfault.
+  /*
+  * flag : WillChoi
+  * modify date : 17.09.13
+  * modified : declaration '#if define(_MSC_VER) ... #endif' to be copied
+  * from willyd's caffe windows branch on github for MSVC 14
+  */
+  // Windows port of glogs doesn't have this function built
+#if !defined(_MSC_VER)
   ::google::InstallFailureSignalHandler();
+#endif
 }
 
 #ifdef CPU_ONLY  // CPU-only Caffe.
@@ -128,7 +150,7 @@ Caffe::~Caffe() {
   }
 }
 
-void Caffe::set_random_seed(const unsigned int seed) {
+void Caffe::set_random_seed(const uint64_t seed) {
   // Curand seed
   static bool g_curand_availability_logged = false;
   if (Get().curand_generator_) {
@@ -238,7 +260,7 @@ int Caffe::FindDevice(const int start_id) {
 class Caffe::RNG::Generator {
  public:
   Generator() : rng_(new caffe::rng_t(cluster_seedgen())) {}
-  explicit Generator(unsigned int seed) : rng_(new caffe::rng_t(seed)) {}
+  explicit Generator(int64_t seed) : rng_(new caffe::rng_t(seed)) {}
   caffe::rng_t* rng() { return rng_.get(); }
  private:
   shared_ptr<caffe::rng_t> rng_;
@@ -246,7 +268,7 @@ class Caffe::RNG::Generator {
 
 Caffe::RNG::RNG() : generator_(new Generator()) { }
 
-Caffe::RNG::RNG(unsigned int seed) : generator_(new Generator(seed)) { }
+Caffe::RNG::RNG(int64_t seed) : generator_(new Generator(seed)) { }
 
 Caffe::RNG& Caffe::RNG::operator=(const RNG& other) {
   generator_.reset(other.generator_.get());

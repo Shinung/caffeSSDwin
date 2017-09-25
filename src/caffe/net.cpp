@@ -17,7 +17,15 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/util/upgrade_proto.hpp"
 
-#include "caffe/test/test_caffe_main.hpp"
+/*
+* flag : WillChoi
+* modify date : 17.09.13
+* modified : Annotated below '#inlcude'
+* resone : Occured error as 'Cannot open include file: gtest/gtest.h...'
+*/
+//#include "caffe/test/test_caffe_main.hpp"
+
+//#define PRINT_LINE
 
 namespace caffe {
 
@@ -101,6 +109,9 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
         << "Creating Layer " << layer_param.name();
     bool need_backward = false;
 
+#ifdef PRINT_LINE
+	LOG(INFO) << "Figure out... for{}";
+#endif // PRINT_LINE
     // Figure out this layer's input and output
     for (int bottom_id = 0; bottom_id < layer_param.bottom_size();
          ++bottom_id) {
@@ -110,6 +121,9 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
       need_backward |= blob_need_backward_[blob_id];
     }
     int num_top = layer_param.top_size();
+#ifdef PRINT_LINE
+	LOG(INFO) << "Collect Input layer... for{}";
+#endif // PRINT_LINE
     for (int top_id = 0; top_id < num_top; ++top_id) {
       AppendTop(param, layer_id, top_id, &available_blobs, &blob_name_to_idx);
       // Collect Input layer tops as Net inputs.
@@ -123,9 +137,18 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
     // specified fewer than the required number (as specified by
     // ExactNumTopBlobs() or MinTopBlobs()), allocate them here.
     Layer<Dtype>* layer = layers_[layer_id].get();
+#ifdef PRINT_LINE
+	LOG(INFO) << "befor if...";
+#endif // PRINT_LINE
     if (layer->AutoTopBlobs()) {
+#ifdef PRINT_LINE
+		LOG(INFO) << "std::max()";
+#endif // PRINT_LINE
       const int needed_num_top =
           std::max(layer->MinTopBlobs(), layer->ExactNumTopBlobs());
+#ifdef PRINT_LINE
+	  LOG(INFO) << "AppendTop() for{}";
+#endif // PRINT_LINE
       for (; num_top < needed_num_top; ++num_top) {
         // Add "anonymous" top blobs -- do not modify available_blobs or
         // blob_name_to_idx as we don't want these blobs to be usable as input
@@ -133,11 +156,20 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
         AppendTop(param, layer_id, num_top, NULL, NULL);
       }
     }
+#ifdef PRINT_LINE
+	LOG(INFO) << "share_from_root if... before";
+#endif // PRINT_LINE
     // After this layer is connected, set it up.
     if (share_from_root) {
+#ifdef PRINT_LINE
+		LOG(INFO) << "share_from_root if... inside";
+#endif // PRINT_LINE
       // Set up size of top blobs using root_net_
       const vector<Blob<Dtype>*>& base_top = root_net_->top_vecs_[layer_id];
       const vector<Blob<Dtype>*>& this_top = this->top_vecs_[layer_id];
+#ifdef PRINT_LINE
+	  LOG(INFO) << "->ReshapeLike() ... for{}";
+#endif // PRINT_LINE
       for (int top_id = 0; top_id < base_top.size(); ++top_id) {
         this_top[top_id]->ReshapeLike(*base_top[top_id]);
         LOG(INFO) << "Created top blob " << top_id << " (shape: "
@@ -145,6 +177,9 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
             << layer_param.name();
       }
     } else {
+#ifdef PRINT_LINE
+		LOG(INFO) << "share_from_root else... inside";
+#endif // PRINT_LINE
       layers_[layer_id]->SetUp(bottom_vecs_[layer_id], top_vecs_[layer_id]);
     }
     LOG_IF(INFO, Caffe::root_solver())

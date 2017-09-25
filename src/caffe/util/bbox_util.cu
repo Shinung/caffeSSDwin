@@ -6,6 +6,17 @@
 #include "thrust/functional.h"
 #include "thrust/sort.h"
 
+/*
+* flag : WillChoi
+* modify date : 17.09.14
+* modified : undefine 'STRICT'
+* resone : If not undefining 'STRICT', it will occur 'expected identifier' compile error in caffe.pb.h
+*          because 'STRICT' is defined in 'boost/detail/winapi/basic_type.hpp' and also, it is declared
+*          as struct variable in caffe.pb.h.
+*          However, I don't know why the error occur in this code and relevance between bbox_util.cu and caffe.pb.h
+*/
+#undef STRICT
+
 #include "caffe/common.hpp"
 #include "caffe/util/bbox_util.hpp"
 

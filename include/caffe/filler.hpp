@@ -12,6 +12,8 @@
 #include "caffe/syncedmem.hpp"
 #include "caffe/util/math_functions.hpp"
 
+//#define PRINT_LINE_FILLER
+
 namespace caffe {
 
 /// @brief Fills a Blob with constant or randomly-generated data.
@@ -53,6 +55,12 @@ class UniformFiller : public Filler<Dtype> {
       : Filler<Dtype>(param) {}
   virtual void Fill(Blob<Dtype>* blob) {
     CHECK(blob->count());
+#ifdef PRINT_LINE
+	LOG(INFO) << "UniformFiller";
+	LOG(INFO) << "min: " << Dtype(this->filler_param_.min())
+		<< " max: " << Dtype(this->filler_param_.max());
+#endif // PRINT_LINE
+
     caffe_rng_uniform<Dtype>(blob->count(), Dtype(this->filler_param_.min()),
         Dtype(this->filler_param_.max()), blob->mutable_cpu_data());
     CHECK_EQ(this->filler_param_.sparse(), -1)
@@ -105,6 +113,10 @@ class PositiveUnitballFiller : public Filler<Dtype> {
   virtual void Fill(Blob<Dtype>* blob) {
     Dtype* data = blob->mutable_cpu_data();
     DCHECK(blob->count());
+#ifdef PRINT_LINE_FILLER
+	LOG(INFO) << "PositiveUnitballFiller";
+#endif // PRINT_LINE_FILLER
+
     caffe_rng_uniform<Dtype>(blob->count(), 0, 1, blob->mutable_cpu_data());
     // We expect the filler to not be called very frequently, so we will
     // just use a simple implementation
@@ -147,19 +159,45 @@ class XavierFiller : public Filler<Dtype> {
       : Filler<Dtype>(param) {}
   virtual void Fill(Blob<Dtype>* blob) {
     CHECK(blob->count());
-    int fan_in = blob->count() / blob->num();
-    int fan_out = blob->count() / blob->channels();
-    Dtype n = fan_in;  // default to fan_in
-    if (this->filler_param_.variance_norm() ==
-        FillerParameter_VarianceNorm_AVERAGE) {
-      n = (fan_in + fan_out) / Dtype(2);
-    } else if (this->filler_param_.variance_norm() ==
-        FillerParameter_VarianceNorm_FAN_OUT) {
-      n = fan_out;
-    }
-    Dtype scale = sqrt(Dtype(3) / n);
-    caffe_rng_uniform<Dtype>(blob->count(), -scale, scale,
-        blob->mutable_cpu_data());
+	int fan_in = 0, fan_out = 0;
+
+	if (blob->num()) {
+		fan_in = blob->count() / blob->num();
+	}
+	if (blob->channels()) {
+		fan_out = blob->count() / blob->channels();
+	}
+	Dtype n = fan_in;  // default to fan_in
+	if (this->filler_param_.variance_norm() ==
+		FillerParameter_VarianceNorm_AVERAGE) {
+#ifdef PRINT_LINE_FILLER
+		LOG(INFO) << "XavierFiller: FillerParameter_VarianceNorm_AVERAGE";
+#endif // PRINT_LINE_FILLER
+		n = (fan_in + fan_out) / Dtype(2);
+	}
+	else if (this->filler_param_.variance_norm() ==
+		FillerParameter_VarianceNorm_FAN_OUT) {
+#ifdef PRINT_LINE_FILLER
+		LOG(INFO) << "XavierFiller: FillerParameter_VarianceNorm_FAN_OUT";
+#endif // PRINT_LINE_FILLER
+		n = fan_out;
+	}
+	Dtype scale;
+	if (n) {
+		scale = sqrt(Dtype(3) / n);
+	}
+	else {
+		scale = Dtype(0);
+	}
+#ifdef PRINT_LINE_FILLER
+	LOG(INFO) << "XavierFiller";
+	LOG(INFO) << "scale: " << scale;
+#endif // PRINT_LINE_FILLER
+	caffe_rng_uniform<Dtype>(blob->count(), -scale, scale,
+		blob->mutable_cpu_data(),
+		blob->num(), blob->channels(), fan_in, fan_out, n,
+		blob->width(), blob->height());
+
     CHECK_EQ(this->filler_param_.sparse(), -1)
          << "Sparsity not supported by this Filler.";
   }

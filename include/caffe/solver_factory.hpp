@@ -69,12 +69,24 @@ class SolverRegistry {
     registry[type] = creator;
   }
 
+//#define PRINT_LINE_SOL
+
   // Get a solver using a SolverParameter.
   static Solver<Dtype>* CreateSolver(const SolverParameter& param) {
+#ifdef PRINT_LINE_SOL
+	  LOG(INFO) << "inside CreateSolver()";
+#endif // PRINT_LINE
+
     const string& type = param.type();
+#ifdef PRINT_LINE_SOL
+	LOG(INFO);
+#endif // PRINT_LINE
     CreatorRegistry& registry = Registry();
     CHECK_EQ(registry.count(type), 1) << "Unknown solver type: " << type
         << " (known types: " << SolverTypeListString() << ")";
+#ifdef PRINT_LINE_SOL
+	LOG(INFO) << "inside CreateSolver()";
+#endif // PRINT_LINE
     return registry[type](param);
   }
 

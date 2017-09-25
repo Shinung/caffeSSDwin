@@ -5,7 +5,13 @@
 
 namespace caffe {
 
-const float kBNLL_THRESHOLD = 50.;
+/*
+ * Date : 17.09.12
+ * change const flost -> #define by Will Choi
+ * to avoid error on MSVC 14
+ */
+#define kBNLL_THRESHOLD 50.0
+//const float kBNLL_THRESHOLD = 50.;
 
 template <typename Dtype>
 __global__ void BNLLForward(const int n, const Dtype* in, Dtype* out) {

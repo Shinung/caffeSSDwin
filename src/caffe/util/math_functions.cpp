@@ -244,25 +244,55 @@ template
 double caffe_nextafter(const double b);
 
 template <typename Dtype>
-void caffe_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r) {
+void caffe_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r,
+	int num, int channels, int fanin, int fanout, int in_n, int width, int height) {
   CHECK_GE(n, 0);
   CHECK(r);
   CHECK_LE(a, b);
+//#ifdef _MSC_VER
+//  if (a <= b)
+//  {
+//	  boost::uniform_real<Dtype> random_distribution(a, caffe_nextafter<Dtype>(b));
+//	  boost::variate_generator<caffe::rng_t*, boost::uniform_real<Dtype> >
+//		  variate_generator(caffe_rng(), random_distribution);
+//	  for (int i = 0; i < n; ++i) {
+//		  r[i] = variate_generator();
+//	  }
+//  } else {
+//	  LOG(INFO) << "a: " << a << " b: " << b;
+//	  LOG(INFO) << "blob->count: " << n << " blob->num: " << num;
+//	  LOG(INFO) << "blob->channels: " << channels;
+//	  LOG(INFO) << "blob->width: " << width << " blob->height: " << height;
+//	  LOG(INFO) << "fan_in: " << fanin << " fan_out: " << fanout;
+//	  LOG(INFO) << "n: " << in_n;
+//	  LOG(INFO) << "r: " << r;
+//	  CHECK_LE(a, b);
+//	  boost::uniform_real<Dtype> random_distribution(b, caffe_nextafter<Dtype>(a));
+//	  boost::variate_generator<caffe::rng_t*, boost::uniform_real<Dtype> >
+//		  variate_generator(caffe_rng(), random_distribution);
+//	  for (int i = 0; i < n; ++i) {
+//		  r[i] = variate_generator();
+//	  }
+//  }
+//#else
   boost::uniform_real<Dtype> random_distribution(a, caffe_nextafter<Dtype>(b));
   boost::variate_generator<caffe::rng_t*, boost::uniform_real<Dtype> >
-      variate_generator(caffe_rng(), random_distribution);
+	  variate_generator(caffe_rng(), random_distribution);
   for (int i = 0; i < n; ++i) {
-    r[i] = variate_generator();
+	  r[i] = variate_generator();
   }
+//#endif // _MSC_VER
 }
 
 template
 void caffe_rng_uniform<float>(const int n, const float a, const float b,
-                              float* r);
+	float* r,
+	int num, int channels, int fanin, int fanout, int in_n, int width, int height);
 
 template
 void caffe_rng_uniform<double>(const int n, const double a, const double b,
-                               double* r);
+	double* r, 
+	int num, int channels, int fanin, int fanout, int in_n, int width, int height);
 
 template <typename Dtype>
 void caffe_rng_gaussian(const int n, const Dtype a,

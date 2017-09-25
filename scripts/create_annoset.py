@@ -119,7 +119,7 @@ if __name__ == "__main__":
   # get caffe root directory
   caffe_root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
   if anno_type == "detection":
-    cmd = "{}/build/tools/convert_annoset" \
+    cmd = "{}/build/tools/Release/convert_annoset.exe" \
         " --anno_type={}" \
         " --label_type={}" \
         " --label_map_file={}" \
@@ -139,7 +139,7 @@ if __name__ == "__main__":
             min_dim, max_dim, resize_height, resize_width, backend, shuffle,
             check_size, encode_type, encoded, gray, root_dir, list_file, out_dir)
   elif anno_type == "classification":
-    cmd = "{}/build/tools/convert_annoset" \
+    cmd = "{}/build/tools/Release/convert_annoset.exe" \
         " --anno_type={}" \
         " --min_dim={}" \
         " --max_dim={}" \

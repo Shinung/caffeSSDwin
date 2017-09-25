@@ -12,6 +12,8 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/util/rng.hpp"
 
+//#define PRINT_LINE
+
 namespace caffe {
 
 template<typename Dtype>
@@ -467,7 +469,15 @@ void DataTransformer<Dtype>::ExpandImage(const Datum& datum,
   int height = static_cast<int>(datum_height * expand_ratio);
   int width = static_cast<int>(datum_width * expand_ratio);
   float h_off, w_off;
+#ifdef PRINT_LINE
+  LOG(INFO) << "height: " << height << " datum_height: " << datum_height;
+#endif // PRINT_LINE
+
   caffe_rng_uniform(1, 0.f, static_cast<float>(height - datum_height), &h_off);
+
+#ifdef PRINT_LINE
+  LOG(INFO) << "width: " << width << " datum_width: " << datum_width;
+#endif // PRINT_LINE
   caffe_rng_uniform(1, 0.f, static_cast<float>(width - datum_width), &w_off);
   h_off = floor(h_off);
   w_off = floor(w_off);
@@ -521,6 +531,11 @@ void DataTransformer<Dtype>::ExpandImage(const AnnotatedDatum& anno_datum,
     return;
   }
   float expand_ratio;
+
+#ifdef PRINT_LINE
+  LOG(INFO) << "max_expand_ratio: " << max_expand_ratio;
+#endif // PRINT_LINE
+
   caffe_rng_uniform(1, 1.f, max_expand_ratio, &expand_ratio);
   // Expand the datum.
   NormalizedBBox expand_bbox;
@@ -833,7 +848,15 @@ void DataTransformer<Dtype>::ExpandImage(const cv::Mat& img,
   int height = static_cast<int>(img_height * expand_ratio);
   int width = static_cast<int>(img_width * expand_ratio);
   float h_off, w_off;
+#ifdef PRINT_LINE
+  LOG(INFO) << "height: " << height << " img_height: " << img_height;
+#endif // PRINT_LINE
+
   caffe_rng_uniform(1, 0.f, static_cast<float>(height - img_height), &h_off);
+
+#ifdef PRINT_LINE
+  LOG(INFO) << "width: " << width << " img_width: " << img_width;
+#endif // PRINT_LINE
   caffe_rng_uniform(1, 0.f, static_cast<float>(width - img_width), &w_off);
   h_off = floor(h_off);
   w_off = floor(w_off);

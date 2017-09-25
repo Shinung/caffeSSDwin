@@ -21,6 +21,8 @@
 #include "caffe/util/im_transforms.hpp"
 #include "caffe/util/math_functions.hpp"
 
+//#define PRINT_LINE
+
 namespace caffe {
 
 const float prob_eps = 0.01;
@@ -30,6 +32,11 @@ int roll_weighted_die(const vector<float>& probabilities) {
   std::partial_sum(&probabilities[0], &probabilities[0] + probabilities.size(),
                    std::back_inserter(cumulative));
   float val;
+#ifdef PRINT_LINE
+  if(cumulative.back() < 0)
+	LOG(INFO) << "cumulative.back(): " << cumulative.back();
+#endif // PRINT_LINE
+
   caffe_rng_uniform(1, static_cast<float>(0), cumulative.back(), &val);
 
   // Find the position within the sequence and add 1
@@ -555,6 +562,10 @@ void RandomBrightness(const cv::Mat& in_img, cv::Mat* out_img,
   if (prob < brightness_prob) {
     CHECK_GE(brightness_delta, 0) << "brightness_delta must be non-negative.";
     float delta;
+#ifdef PRINT_LINE
+	LOG(INFO) << "brightness_delta: " << brightness_delta;
+#endif // PRINT_LINE
+
     caffe_rng_uniform(1, -brightness_delta, brightness_delta, &delta);
     AdjustBrightness(in_img, delta, out_img);
   } else {
@@ -579,6 +590,10 @@ void RandomContrast(const cv::Mat& in_img, cv::Mat* out_img,
     CHECK_GE(upper, lower) << "contrast upper must be >= lower.";
     CHECK_GE(lower, 0) << "contrast lower must be non-negative.";
     float delta;
+#ifdef PRINT_LINE
+	LOG(INFO) << "lower: " << lower << " upper: " << upper;
+#endif // PRINT_LINE
+
     caffe_rng_uniform(1, lower, upper, &delta);
     AdjustContrast(in_img, delta, out_img);
   } else {
@@ -603,6 +618,10 @@ void RandomSaturation(const cv::Mat& in_img, cv::Mat* out_img,
     CHECK_GE(upper, lower) << "saturation upper must be >= lower.";
     CHECK_GE(lower, 0) << "saturation lower must be non-negative.";
     float delta;
+#ifdef PRINT_LINE
+	LOG(INFO) << "lower: " << lower << " upper: " << upper;
+#endif // PRINT_LINE
+
     caffe_rng_uniform(1, lower, upper, &delta);
     AdjustSaturation(in_img, delta, out_img);
   } else {
@@ -638,6 +657,10 @@ void RandomHue(const cv::Mat& in_img, cv::Mat* out_img,
   if (prob < hue_prob) {
     CHECK_GE(hue_delta, 0) << "hue_delta must be non-negative.";
     float delta;
+#ifdef PRINT_LINE
+	LOG(INFO) << "hue_delta: " << hue_delta;
+#endif // PRINT_LINE
+
     caffe_rng_uniform(1, -hue_delta, hue_delta, &delta);
     AdjustHue(in_img, delta, out_img);
   } else {

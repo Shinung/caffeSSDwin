@@ -4,6 +4,7 @@
 #endif  // USE_OPENCV
 #include <algorithm>
 #include <fstream>  // NOLINT(readability/streams)
+
 #include <map>
 #include <string>
 #include <utility>
@@ -252,14 +253,25 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
           std::ofstream outfile;
           outfile.open(out_file.string().c_str(), std::ofstream::out);
 
-          boost::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
+		  /*
+		  * flag : WillChoi
+		  * modify date : 17.09.21
+		  * modified : Commanted about 'boost::regex'
+		  * resone : nvcc will make compile error with boost::regex so I've used std::regex instead of boost::regex
+		  * reference : https://github.com/colmap/colmap/issues/29
+		  *			    https://stackoverflow.com/questions/7589672/boost-regex-vs-c11-regex
+		  */
+		  //boost::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
+		  std::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
           ptree output;
           output.add_child("detections", detections_);
           std::stringstream ss;
           write_json(ss, output);
-          std::string rv = boost::regex_replace(ss.str(), exp, "$1");
-          outfile << rv.substr(rv.find("["), rv.rfind("]") - rv.find("["))
-              << std::endl << "]" << std::endl;
+          //std::string rv = boost::regex_replace(ss.str(), exp, "$1");
+		  std::string rv = std::regex_replace(ss.str(), exp, "$1");
+		  outfile << rv.substr(rv.find("["), rv.rfind("]") - rv.find("["))
+			  << std::endl << "]" << std::endl;
+		  
         } else if (output_format_ == "ILSVRC") {
           boost::filesystem::path output_directory(output_directory_);
           boost::filesystem::path file(output_name_prefix_ + ".txt");

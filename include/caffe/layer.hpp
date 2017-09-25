@@ -11,6 +11,8 @@
 #include "caffe/proto/caffe.pb.h"
 #include "caffe/util/math_functions.hpp"
 
+//#define PRINT_LINE_LAYER
+
 /**
  Forward declare boost::thread instead of including boost/thread.hpp
  to avoid a boost/NVCC issues (#1009, #1010) on OSX.
@@ -66,10 +68,25 @@ class Layer {
    */
   void SetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+#ifdef PRINT_LINE_LAYER
+	  LOG(INFO) << "InitMutex()";
+#endif // PRINT_LINE_LAYER
     InitMutex();
+#ifdef PRINT_LINE_LAYER
+	LOG(INFO) << "CheckBlobCounts(bottom, top)";
+#endif // PRINT_LINE_LAYER
     CheckBlobCounts(bottom, top);
+#ifdef PRINT_LINE_LAYER
+	LOG(INFO) << "LayerSetUp(bottom, top)";
+#endif // PRINT_LINE_LAYER
     LayerSetUp(bottom, top);
+#ifdef PRINT_LINE_LAYER
+	LOG(INFO) << "Reshape(bottom, top)";
+#endif // PRINT_LINE_LAYER
     Reshape(bottom, top);
+#ifdef PRINT_LINE_LAYER
+	LOG(INFO) << "SetLossWeights(top)";
+#endif // PRINT_LINE_LAYER
     SetLossWeights(top);
   }
 
