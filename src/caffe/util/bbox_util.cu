@@ -15,7 +15,9 @@
 *          as struct variable in caffe.pb.h.
 *          However, I don't know why the error occur in this code and relevance between bbox_util.cu and caffe.pb.h
 */
+#ifdef _MSC_VER
 #undef STRICT
+#endif
 
 #include "caffe/common.hpp"
 #include "caffe/util/bbox_util.hpp"

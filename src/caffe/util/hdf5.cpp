@@ -36,10 +36,22 @@ void hdf5_load_nd_dataset_helper(
    */
   switch (class_) {
   case H5T_FLOAT:
-	{ LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_FLOAT"; }
+    #ifdef _MSC_VER
+	  { 
+    #endif
+    LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_FLOAT"; 
+    #ifdef _MSC_VER
+    }
+    #endif
     break;
   case H5T_INTEGER:
-	{ LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_INTEGER"; }
+	  #ifdef _MSC_VER
+	  { 
+    #endif
+    LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_INTEGER"; 
+    #ifdef _MSC_VER
+    }
+    #endif
     break;
   case H5T_TIME:
     LOG(FATAL) << "Unsupported datatype class: H5T_TIME";

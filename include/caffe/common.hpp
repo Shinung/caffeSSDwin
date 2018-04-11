@@ -113,7 +113,9 @@ void GlobalInit(int* pargc, char*** pargv);
 *			 in rng_stream()
 * ref : https://github.com/BVLC/caffe/pull/297
 */
+#ifdef _MSC_VER
 uint64_t cluster_seedgen(void);
+#endif
 
 // A singleton class to hold common caffe stuff, such as the handler that
 // caffe is going to use for cublas, curand, etc.
