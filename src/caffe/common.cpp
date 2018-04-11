@@ -23,10 +23,15 @@ namespace caffe {
 // Make sure each thread can have different values.
 static boost::thread_specific_ptr<Caffe> thread_instance_;
 
+void Caffe::Set(Caffe* ctx) {
+  if (ctx == 0)
+    thread_instance_.release();
+  else
+    thread_instance_.reset(ctx);
+}
+
 Caffe& Caffe::Get() {
-  if (!thread_instance_.get()) {
-    thread_instance_.reset(new Caffe());
-  }
+  CHECK(thread_instance_.get()) << "Caffe context not initialized";
   return *(thread_instance_.get());
 }
 
