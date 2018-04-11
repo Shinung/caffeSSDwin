@@ -270,8 +270,11 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
           output.add_child("detections", detections_);
           std::stringstream ss;
           write_json(ss, output);
-          //std::string rv = boost::regex_replace(ss.str(), exp, "$1");
-		  std::string rv = std::regex_replace(ss.str(), exp, "$1");
+#ifndef _MSC_VER
+          std::string rv = boost::regex_replace(ss.str(), exp, "$1");
+#else
+	    	  std::string rv = std::regex_replace(ss.str(), exp, "$1");
+#endif
 		  outfile << rv.substr(rv.find("["), rv.rfind("]") - rv.find("["))
 			  << std::endl << "]" << std::endl;
 		  
