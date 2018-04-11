@@ -260,9 +260,12 @@ void DetectionOutputLayer<Dtype>::Forward_gpu(
 		  * resone : nvcc will make compile error with boost::regex so I've used std::regex instead of boost::regex
 		  * reference : https://github.com/colmap/colmap/issues/29
 		  *			    https://stackoverflow.com/questions/7589672/boost-regex-vs-c11-regex
-		  */
-		  //boost::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
-		  std::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
+      */
+#ifndef _MSC_VER
+      boost::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
+#else
+      std::regex exp("\"(null|true|false|-?[0-9]+(\\.[0-9]+)?)\"");
+#endif
           ptree output;
           output.add_child("detections", detections_);
           std::stringstream ss;

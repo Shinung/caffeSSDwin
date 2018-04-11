@@ -15,8 +15,11 @@
 * reference : https://github.com/colmap/colmap/issues/29
 *			  https://stackoverflow.com/questions/7589672/boost-regex-vs-c11-regex
 */
-//#include <boost/regex.hpp>
+#ifndef _MSC_VER
+#include <boost/regex.hpp>
+#else
 #include <regex>
+#endif
 
 #include <map>
 #include <string>

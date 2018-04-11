@@ -23,7 +23,9 @@
 * modified : Annotated below '#inlcude'
 * resone : Occured error as 'Cannot open include file: gtest/gtest.h...'
 */
-//#include "caffe/test/test_caffe_main.hpp"
+#ifndef _MSC_VER
+#include "caffe/test/test_caffe_main.hpp"
+#endif
 
 //#define PRINT_LINE
 
