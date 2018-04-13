@@ -163,8 +163,10 @@ cmake -G"!CMAKE_GENERATOR!" ^
       -DBLAS=Open ^
       -DCMAKE_BUILD_TYPE:STRING=%CMAKE_CONFIG% ^
       -DBUILD_SHARED_LIBS:BOOL=%CMAKE_BUILD_SHARED_LIBS% ^
-      -DBUILD_python:BOOL=%BUILD_PYTHON% ^
-      -DBUILD_python_layer:BOOL=%BUILD_PYTHON_LAYER% ^
+      -DBUILD_python=OFF ^
+      -DBUILD_python_layer=OFF ^
+      -DUSE_LEVELDB=OFF ^
+      -DUSE_LMDB=OFF ^
       -DBUILD_matlab:BOOL=%BUILD_MATLAB% ^
       -DCPU_ONLY:BOOL=%CPU_ONLY% ^
       -DCOPY_PREREQUISITES:BOOL=1 ^
